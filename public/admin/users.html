@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Users &laquo; Admin</title>
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="../assets/css/admin.css">
   <script src="../assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
   <script>NProgress.start()</script>
 
@@ -29,17 +31,18 @@
         <strong>错误！</strong>发生XXX错误
       </div> -->
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4" id="modifyBox">
           <form id="userForm">
             <h2>添加新用户</h2>
             <div class="form-group">
               <label>头像</label>
               <div class="form-group">
                 <label class="form-image">
-                  <input  type="file" name="avatar" id="avatar">
-                  <img src="../assets/img/default.png">
+                  <input type="file" name="avatar" id="avatar">
+                  <img src="../assets/img/default.png" id="preview">
                   <i class="mask fa fa-upload"></i>
                 </label>
+                <input type="hidden" name="avatar" id="hiddenavatar">
               </div>
             </div>
             <div class="form-group">
@@ -78,12 +81,12 @@
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none" id="deleteMany">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
-               <tr>
-                <th class="text-center" width="40"><input type="checkbox"></th>
+              <tr>
+                <th class="text-center" width="40"><input type="checkbox" id="selectAll"></th>
                 <th class="text-center" width="80">头像</th>
                 <th>邮箱</th>
                 <th>昵称</th>
@@ -92,43 +95,8 @@
                 <th class="text-center" width="100">操作</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="../assets/img/default.png"></td>
-                <td>coder@itcast.cn</td>
-                <td>coder</td>
-                <td>激活</td>
-                <td>普通用户</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="../assets/img/default.png"></td>
-                <td>coder@itcast.cn</td>
-                <td>coder</td>
-                <td>激活</td>
-                <td>普通用户</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><input type="checkbox"></td>
-                <td class="text-center"><img class="avatar" src="../assets/img/default.png"></td>
-                <td>coder@itcast.cn</td>
-                <td>coder</td>
-                <td>激活</td>
-                <td>普通用户</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
+            <tbody id="userBox">
+
             </tbody>
           </table>
         </div>
@@ -136,6 +104,54 @@
     </div>
   </div>
 
+  <!-- 修改用户列表 -->
+  <script type="text/html" id="modifyTpl">
+    <form id="modifyForm" data-id="{{_id}}">
+      <h2>修改用户信息</h2>
+      <div class="form-group">
+        <label>头像</label>
+        <div class="form-group">
+          <label class="form-image">
+            <input id="avatar" type="file">
+            {{if avatar}}
+            <img src="{{avatar}}" id="preview">
+            {{else}}
+            <img src="../assets/img/default.png" id="preview">
+            {{/if}}
+            <i class="mask fa fa-upload"></i>
+          </label>
+          <input type="hidden" name="avatar" id="hiddenAvatar" value="{{avatar}}">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>邮箱</label>
+        <input class="form-control" type="email" placeholder="请输入邮箱" name="email" value="{{email}}">
+      </div>
+      <div class="form-group">
+        <label>昵称</label>
+        <input class="form-control" type="text" placeholder="请输入昵称" name="nickName" value="{{nickName}}">
+      </div>
+      <div class="form-group">
+        <div class="radio-inline">
+          <label><input type="radio" name="status" value="0" {{status == 0 ? 'checked' : ''}}>未激活</label>
+        </div>
+        <div class="radio-inline">
+          <label><input type="radio" name="status" value="1" {{status == 1 ? 'checked' : ''}}>激活</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="radio-inline">
+          <label><input type="radio" name="role" value="admin" {{role == 'admin' ? 'checked' : ''}}>超级管理员</label>
+        </div>
+        <div class="radio-inline">
+          <label><input type="radio" name="role" value="normal" {{role == 'normal' ? 'checked': ''}}>普通用户</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary" type="submit">修改</button>
+      </div>
+    </form>
+  </script>
   <div class="aside">
     <div class="profile">
       <img class="avatar" src="../uploads/avatar.jpg">
@@ -174,46 +190,258 @@
   </div>
 
   <script src="../assets/vendors/jquery/jquery.js"></script>
+  <script src="../assets/vendors/art-template/template-web.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/html" id="userInpt">
+    {{each data}}
+    
+            <tr>
+                <td class="text-center">
+                    <input type="checkbox" class="userStatus" data-id="{{$value._id}}">
+                  </td>
+                <td class="text-center"><input type="checkbox"></td>
+                <td class="text-center">
+                  {{if $value.avatar}}
+                  <img class="avatar" src="{{$value.avatar}}">
+                {{/if}}
+                </td>
+                <td>{{$value.email}}</td>
+                <td>{{$value.nickName}}</td>
+                <td>{{$value.status ==0 ? '未激活' : '激活' }}</td>
+                <td>{{$value.role=='admin' ? '管理员' : '用户' }}</td>
+                <td class="text-center">
+                  <a href="javascript:;" class="btn btn-default btn-xs edit" data-id="{{$value._id}}">编辑</a>
+                  <a href="javascript:;" class="btn btn-danger btn-xs delete" data-id="{{$value._id}}">删除</a>
+                </td>
+              </tr>
+  {{/each}}
+  </script>
   <script>NProgress.done()</script>
   <script>
 
-     
-      $('#userForm').on('submit',function(){
-       
-        var formData=$(this).serialize();
-       // console.log(formData);
-       $.ajax({
-         url:'/users',
-         type:'post',
-         data:formData,
-         success:function(){
-           location.reload();
-         },
-         error:function(message){
-           alert('添加失败');
-         }
-       })
-        return false
+    //添加用户到数据库模块
+    $('#userForm').on('submit', function () {
+
+      var formData = $(this).serialize();
+      // console.log(formData);
+      $.ajax({
+        url: '/users',
+        type: 'post',
+        data: formData,
+        success: function () {
+          location.reload();
+        },
+        error: function (message) {
+          alert('添加失败');
+        }
       })
-      
-      $('#avatar').on('change',function(){
-        var formData=new formData();
-        formData.append(this.file[0])
+      return false
+    })
+    //头像上传功能
+    // $('#avatar').on('change',function(){
+    //   var formData=new FormData();
+    //   formData.append('avater',this.files[0]);
+    //   $.ajax({
+    //     url:'/upload',
+    //     type:'post',
+    //     data:formData,
+    //     //
+    //     processData:false,
+    //     //
+    //     contentType:false,
+    //     success:function(res){
+    //       console.log(res);
+    //       $('#preview').attr('src',res[0].avater);
+    //       $('#hiddenavatar').val(res[0].avater);
+    //     }
+    //   })
+
+    // })
+
+
+    $('#avatar').on('change', function () {
+      var formData = new FormData();
+      //    FormData 接口的append() 方法 会添加一个新值到 FormData 对象内的一个已存在的键中，如果键不存在则会添加该键。
+      //    FormData.set 和 append() 的区别在于，如果指定的键已经存在， FormData.set 会使用新值覆盖已有的值，而 append() 会把新值添加到已有值集合的后面
+      //    formData.append(name, value);
+      //    formData.append(name, value, filename);
+      formData.append('avater', this.files[0]);
+      $.ajax({
+        url: '/upload',
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          //这里是实现头像预览功能
+          $('#preview').attr('src', res[0].avater);
+          //这里是将头像数据上传到数据库中
+          $('#hiddenavatar').val(res[0].avater);
+        }
+      })
+    })
+    //用户列表展示
+    $.ajax({
+      url: '/users',
+      type: 'get',
+      success: function (res) {
+        // console.log(res);
+        var html = template('userInpt', { data: res });
+        $('#userBox').html(html);
+      }
+    })
+
+    //用户编辑点击事件 使用了事件委托事件给所有子元素 click 绑定事件
+    $('#userBox').on('click', '.edit', function () {
+      // 获取被点击用户的id值
+      var id = $(this).attr('data-id');
+      // 根据id获取用户的详细信息
+      $.ajax({
+        type: 'get',
+        url: '/users/' + id,
+        success: function (response) {
+          //console.log(response)
+          var html = template('modifyTpl', response);
+          $('#modifyBox').html(html);
+        }
+      })
+    });
+
+    //利用事件委托去给所有子元素绑定 submit 事件
+    $('#modifyBox').on('submit', '#modifyForm', function () {
+      // var formData = $(this).serialize();
+      // // 获取要修改的那个用户的id值
+      // var id = $(this).attr('data-id');
+      // console.log(id);
+      // //发送请求 修改用户信息
+      // $.ajax({
+      // 	type: 'put',
+      // 	url: '/users/' + id,
+      // 	data: formData,
+      // 	success: function (response) {
+      // 		// 修改用户信息成功 重新加载页面
+      // 		location.reload()
+      //     //console.log('.....')
+      // 	}
+      // })
+
+      var formData = $(this).serialize();
+      var id = $(this).attr('data-id');
+      //console.log(id);
+      $.ajax({
+        type: 'put',
+        url: '/users/' + id,
+        data: formData,
+        success: function () {
+          location.reload();
+        }
+      })
+
+      // 阻止表单默认提交
+      return false;
+    })
+
+    //事件委托 给delete添加点击事件
+    $('#userBox').on('click', '.delete', function () {
+      var id = $(this).attr('data-id');
+      var boolean = confirm('残忍删除？')
+      if (boolean) {
         $.ajax({
-          url:'/upload',
-          type:'post',
-          data:formData,
-          //
-          processData:false,
-          //
-          contentType:false,
-          success:function(){
-            
+          type: `delete`,
+          url: `/users/${id}`,
+          success: function () {
+            location.reload();
           }
         })
-        
-      })
-   </script> 
+      }
+    })
+
+
+
+    //用户批量删除
+    var selectAll = $('#selectAll');
+    var deleteMany=$('#deleteMany');
+    //给每个复选框按钮
+    selectAll.on('change', function () {
+      //给点击的复选框添加状态
+      var status = $(this).prop('checked')
+     if(status){
+       deleteMany.show();
+     }else{
+       deleteMany.hide();
+     }
+     $('#userBox').find('input').prop('checked', status);
+    });
+
+
+//利用事件委托给所有的复选框绑定绑定change事件
+$('#userBox').on('change','.userStatus',function(){
+  //获得所有input复选框
+  var inputs=$('#userBox').find('input');
+
+    //inputs的长度和已经被点击的复选框的长度进行比较
+// if(inputs.length===inputs.filter(':checked').length){
+//   selectAll.prop('checked',true);
+// }else{
+//   selectAll.prop('checked',false);
+// }
+//   if(inputs.filter(':checked').length>0){
+//       deleteMany.show();
+//   }else{
+//       deleteMany.hide();
+//   }
+
+  if(inputs.length===inputs.filter(':checked').length){
+    selectAll.prop('checked',true);
+  }else{
+    selectAll.prop('checked',false)
+  }
+
+//根据是否有复选框来判断是否显示deleteMany按键
+  if(inputs.filter(':checked').length>0){
+      deleteMany.show();
+  }else{
+    deleteMany.hide();
+}
+})
+
+// deleteMany.on('click',function(){
+//   var ids=[];
+//   var checkedUser=$('#userBox').find('input').filter(':checked');
+//   checkedUser.each(function(index,elemets){
+//     ids.push($(elemets).attr('data-id'));
+//   });
+//   if(confirm('确定批量删除')){
+//     $.ajax({
+//       type:'delete',
+//       url:'/users/'+ids.join('-'),
+//       success:function(){
+//         location.reload();
+//       }
+//     })
+//   }
+// })
+
+deleteMany.on('click',function(){
+  //获得所有被选中的复选框的id
+    var ids=[];
+    var checkedUser=$('#user').find('input').filter(':checked');
+    checkedUser.each(function(index,elemets){
+      ids.push($(elemets).attr('data-id'));
+
+    });
+    var boolean=confirm('是否确定删除');
+    if(boolean){
+        $.ajax({
+          type:'delete',
+          url:'/users/'+ids.join('-'),
+          success:function(){
+            location.reload();
+          }
+        })
+    }
+})
+  </script>
 </body>
+
 </html>
