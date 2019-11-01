@@ -30,8 +30,8 @@
       <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-      <div class="row">
-        <div class="col-md-4">
+      <div class="row" >
+        <div class="col-md-4" id="modifyList">
           <form id="cataForm">
             <h2>添加分类</h2>
             <div class="form-group">
@@ -115,12 +115,32 @@
         
         <td>{{$value.title}}</td>
         <td class="text-center">
-          <a href="javascript:;" class="btn btn-info btn-xs">编辑</a>
-          <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+          <a href="javascript:;" class="btn btn-info btn-xs edit" data-id="{{$value._id}}">编辑</a>
+          <a href="javascript:;" class="btn btn-danger btn-xs delete" data-id="{{$value._id}}">删除</a>
         </td>
       </tr>
       {{/each}}
   </script>
+
+<script type="text/html" id="modifyBox">
+  <div class="col-md-4">
+    <form id="modifyForm" data-id="{{_id}}">
+      <h2>修改分类</h2>
+      <div class="form-group">
+        <label>名称</label>
+        <input class="form-control" type="text" placeholder="请输入分类名称" name="title" value="{{title}}">
+      </div>
+      <div class="form-group">
+        <label>图标</label>
+        <input class="form-control" type="text" placeholder="请输入分类图标类名" name="className" value="{{className}}">
+      </div>
+      <div class="form-group">
+        <button class="btn btn-primary">修改</button>
+      </div>
+    </form>
+  </div>
+</script>
+
   <script>
     //添加分类列表
     $('#cataForm').on('submit', function (e) {
@@ -142,11 +162,6 @@
       console.log(formData);
     })
 
-
-
-
-
-
     //获取分类列表
     $.ajax({
       url: '/categories',
@@ -156,6 +171,56 @@
         $('#categoriesList').html(html);
       }
     })
+
+
+
+    //保存已经修改的用户数据到服务器端
+    $('#categoriesList').on('click','.edit',function(){
+        var id =$(this).attr('data-id');
+        //console.log(id);
+        $.ajax({
+          url:`/categories/${id}`,
+          success:function(data){
+           // console.log(data);
+            //模板里面不能加 #
+            var html=template('modifyBox',data)
+             $('#modifyList').html(html);     
+          }
+        })
+    })
+
+
+      $("#modifyList").on('submit', '#modifyForm', function () {
+        var formData = $(this).serialize();
+        //var title=$("")
+        var id = $(this).attr('data-id');
+        console.log(formData);
+        console.log(id);
+        $.ajax({
+          type: 'put',
+          url: '/categories/' + id,
+          data: formData,
+          success: function () {
+            location.reload();
+          }
+        })
+        return false;
+      })
+
+      //删除操作
+$('#categoriesList').on('click','.delete',function(){
+        //console.log('...')
+          if(confirm('确认残忍的删除?')){
+              var id=$(this).attr('data-id');
+              $.ajax({
+                url: '/categories/' + id,
+                type:'delete',
+                success:function(){
+                  location.reload();
+                }
+              })
+          }
+})
   </script>
 </body>
 
