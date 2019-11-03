@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
 	// 验证
 	const { error } = Joi.validate(id, schema)
 	// 数据格式没有通过验证
-	if (error) return res.status(400).send({message: error.message});
+	if (error) return res.status(400).send({ message: error.message });
 	// 通过验证
 	// 删除用户
 	let post = await Post.findByIdAndDelete(id);

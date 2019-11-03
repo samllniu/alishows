@@ -30,8 +30,10 @@
       <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-      <div class="row" >
+      <div class="row">
+        <!-- 添加分类目录的父级 -->
         <div class="col-md-4" id="modifyList">
+          <!-- 添加分类目录的父级 -->
           <form id="cataForm">
             <h2>添加分类</h2>
             <div class="form-group">
@@ -59,9 +61,10 @@
                 <th class="text-center" width="100">操作</th>
               </tr>
             </thead>
+            <!-- 分类目录展示父级 -->
             <tbody id="categoriesList">
-
             </tbody>
+            <!-- 分类目录展示父级 -->
           </table>
         </div>
       </div>
@@ -122,17 +125,17 @@
       {{/each}}
   </script>
 
-<script type="text/html" id="modifyBox">
+  <script type="text/html" id="modifyBox">
   <div class="col-md-4">
     <form id="modifyForm" data-id="{{_id}}">
       <h2>修改分类</h2>
       <div class="form-group">
         <label>名称</label>
-        <input class="form-control" type="text" placeholder="请输入分类名称" name="title" value="{{title}}">
+        <input class="form-control" type="text" placeholder="请输入分类名称" name="title" value="{{title}}" id="title">
       </div>
       <div class="form-group">
         <label>图标</label>
-        <input class="form-control" type="text" placeholder="请输入分类图标类名" name="className" value="{{className}}">
+        <input class="form-control" type="text" placeholder="请输入分类图标类名" name="className" value="{{className}}" id="className">
       </div>
       <div class="form-group">
         <button class="btn btn-primary">修改</button>
@@ -143,84 +146,100 @@
 
   <script>
     //添加分类列表
-    $('#cataForm').on('submit', function (e) {
-      e.preventDefault();
-      var formData = $(this).serialize();
-      $.ajax({
+      $('#cataForm').on('submit',function(e){   
+        var formData = $(this).serialize();
+        //console.log(formData);
+        $.ajax({
         type: 'post',
         url: '/categories',
         data: formData,
         success: function (data) {
           location.reload();
           // console.log(data);
-          // console.log("添加成功");
+          console.log("添加成功");
         },
         error: function (err) {
           alert("添加失败");
         }
       })
-      console.log(formData);
-    })
+        e.preventDefault();
+      })
+
 
     //获取分类列表
     $.ajax({
-      url: '/categories',
-      type: 'get',
-      success: function (data) {
-        var html = template('categoriesBox', { data: data });
+      url:'/categories',
+      type:'get',
+      success:function(data){
+        var html=template('categoriesBox',{ data: data });
+       // console.log(html);
         $('#categoriesList').html(html);
+
       }
     })
 
 
 
-    //保存已经修改的用户数据到服务器端
+    //修改的用户数据展示到页面中
     $('#categoriesList').on('click','.edit',function(){
-        var id =$(this).attr('data-id');
-        //console.log(id);
-        $.ajax({
-          url:`/categories/${id}`,
-          success:function(data){
-           // console.log(data);
-            //模板里面不能加 #
-            var html=template('modifyBox',data)
-             $('#modifyList').html(html);     
-          }
-        })
+      var id=$(this).attr('data-id');
+      $.ajax({
+        url: `/categories/${id}`,
+        success: function (data) {
+          // console.log(data);
+          //模板里面不能加 #
+          var html = template('modifyBox', data)
+          $('#modifyList').html(html);
+        }
+      })
     })
 
+    //保存修改的用户数据展示到数据库中
+    // $("#modifyList").on('submit', '#modifyForm', function () {
+    //   var formData = $(this).serialize();
+    //   var id = $(this).attr('data-id');
+    //   console.log(formData);
+    //   console.log(id);
+    //   $.ajax({
+    //     type: 'put',
+    //     url: '/categories/' + id,
+    //     data: formData,
+    //     success: function () {
+    //       location.reload();
+    //     }
+    //   })
+    //   return false;
+    // })
 
-      $("#modifyList").on('submit', '#modifyForm', function () {
-        var formData = $(this).serialize();
-        //var title=$("")
-        var id = $(this).attr('data-id');
-        console.log(formData);
-        console.log(id);
+      $('#modifyList').on('submit','#modifyForm',function(){
+        var formData=$(this).serialize();
+        var id=$(this).attr('data-id');
         $.ajax({
-          type: 'put',
+        type: 'put',
+        url: '/categories/' + id,
+        data: formData,
+        success: function () {
+          location.reload();
+        }
+      })
+        return false
+      })
+
+
+    //删除操作
+    $('#categoriesList').on('click', '.delete', function () {
+      //console.log('...')
+      if (confirm('确认残忍的删除?')) {
+        var id = $(this).attr('data-id');
+        $.ajax({
           url: '/categories/' + id,
-          data: formData,
+          type: 'delete',
           success: function () {
             location.reload();
           }
         })
-        return false;
-      })
-
-      //删除操作
-$('#categoriesList').on('click','.delete',function(){
-        //console.log('...')
-          if(confirm('确认残忍的删除?')){
-              var id=$(this).attr('data-id');
-              $.ajax({
-                url: '/categories/' + id,
-                type:'delete',
-                success:function(){
-                  location.reload();
-                }
-              })
-          }
-})
+      }
+    })
   </script>
 </body>
 

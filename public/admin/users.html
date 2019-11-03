@@ -31,7 +31,9 @@
         <strong>错误！</strong>发生XXX错误
       </div> -->
       <div class="row">
+        <!-- //用户修改时所有子元素的父级 -->
         <div class="col-md-4" id="modifyBox">
+         <!-- //用户修改时所有子元素的父级 -->  
           <form id="userForm">
             <h2>添加新用户</h2>
             <div class="form-group">
@@ -95,9 +97,11 @@
                 <th class="text-center" width="100">操作</th>
               </tr>
             </thead>
-            <tbody id="userBox">
 
+            <!-- 用户展示时所有子元素的父级 -->
+            <tbody id="userBox">
             </tbody>
+             <!-- 用户展示时所有子元素的父级 -->
           </table>
         </div>
       </div>
@@ -192,6 +196,7 @@
   <script src="../assets/vendors/jquery/jquery.js"></script>
   <script src="../assets/vendors/art-template/template-web.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+
   <script type="text/html" id="userInpt">
     {{each data}}
     
@@ -199,7 +204,6 @@
                 <td class="text-center">
                     <input type="checkbox" class="userStatus" data-id="{{$value._id}}">
                   </td>
-                <td class="text-center"><input type="checkbox"></td>
                 <td class="text-center">
                   {{if $value.avatar}}
                   <img class="avatar" src="{{$value.avatar}}">
@@ -220,66 +224,63 @@
   <script>
 
     //添加用户到数据库模块
-    $('#userForm').on('submit', function () {
+    // $('#userForm').on('submit', function () {
 
-      var formData = $(this).serialize();
-      // console.log(formData);
-      $.ajax({
-        url: '/users',
-        type: 'post',
-        data: formData,
-        success: function () {
-          location.reload();
-        },
-        error: function (message) {
-          alert('添加失败');
-        }
-      })
-      return false
-    })
-    //头像上传功能
-    // $('#avatar').on('change',function(){
-    //   var formData=new FormData();
-    //   formData.append('avater',this.files[0]);
+    //   var formData = $(this).serialize();
+    //   // console.log(formData);
     //   $.ajax({
-    //     url:'/upload',
-    //     type:'post',
-    //     data:formData,
-    //     //
-    //     processData:false,
-    //     //
-    //     contentType:false,
-    //     success:function(res){
-    //       console.log(res);
-    //       $('#preview').attr('src',res[0].avater);
-    //       $('#hiddenavatar').val(res[0].avater);
+    //     url: '/users',
+    //     type: 'post',
+    //     data: formData,
+    //     success: function () {
+    //       location.reload();
+    //     },
+    //     error: function (message) {
+    //       alert('添加失败');
     //     }
     //   })
-
+    //   return false
     // })
-
-
-    $('#avatar').on('change', function () {
-      var formData = new FormData();
-      //    FormData 接口的append() 方法 会添加一个新值到 FormData 对象内的一个已存在的键中，如果键不存在则会添加该键。
-      //    FormData.set 和 append() 的区别在于，如果指定的键已经存在， FormData.set 会使用新值覆盖已有的值，而 append() 会把新值添加到已有值集合的后面
-      //    formData.append(name, value);
-      //    formData.append(name, value, filename);
-      formData.append('avater', this.files[0]);
-      $.ajax({
-        url: '/upload',
-        type: 'post',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (res) {
-          //这里是实现头像预览功能
-          $('#preview').attr('src', res[0].avater);
-          //这里是将头像数据上传到数据库中
-          $('#hiddenavatar').val(res[0].avater);
-        }
-      })
+      //用户添加
+    $('#userForm').on('submit',function(){
+        var formData=$(this).serialize();
+        //console.log(formData)
+        $.ajax({
+          url:'/users',
+          type:'post',
+          data:formData,
+          success:function(){
+            location.reload();
+            console.log('....');
+          },
+          error:function(){
+            alert('添加失败')
+          }
+        })
+          return false;
     })
+
+    //头像上传功能
+      $('#avatar').on('change',function(){
+          var formData=new FormData();
+          formData.append('avater',this.files[0])
+          $.ajax({
+            url:'/upload',
+            type:'post',
+            data:formData,
+            processData:false,
+            contentType:false,
+            success:function(res){
+               // console.log(res);
+               //实现头像显示
+                $('#preview').attr('src',res[0].avater);
+                //头像保存到数据库
+                $('#hiddenavatar').val(res[0].avater);
+            }
+          })
+      })
+
+
     //用户列表展示
     $.ajax({
       url: '/users',
@@ -292,43 +293,40 @@
     })
 
     //用户编辑点击事件 使用了事件委托事件给所有子元素 click 绑定事件
-    $('#userBox').on('click', '.edit', function () {
-      // 获取被点击用户的id值
-      var id = $(this).attr('data-id');
-      // 根据id获取用户的详细信息
-      $.ajax({
-        type: 'get',
-        url: '/users/' + id,
-        success: function (response) {
-          //console.log(response)
-          var html = template('modifyTpl', response);
-          $('#modifyBox').html(html);
-        }
-      })
-    });
+    // $('#userBox').on('click', '.edit', function () {
+    //   // 获取被点击用户的id值
+    //   var id = $(this).attr('data-id');
+    //   // 根据id获取用户的详细信息
+    //   $.ajax({
+    //     type: 'get',
+    //     url: '/users/' + id,
+    //     success: function (response) {
+    //       //console.log(response)
+    //       var html = template('modifyTpl', response);
+    //       $('#modifyBox').html(html);
+    //     }
+    //   })
+    // });
 
+      $('#userBox').on('click', '.edit', function () {
+          var id = $(this).attr('data-id');
+
+          $.ajax({
+            url: '/users/' + id,
+            type: 'get',
+            success: function (res) {
+              console.log(res)
+              var html = template('modifyTpl',res)
+                $('#modifyBox').html(html);
+            }
+          })
+        })
     //利用事件委托去给所有子元素绑定 submit 事件
-    $('#modifyBox').on('submit', '#modifyForm', function () {
-      // var formData = $(this).serialize();
-      // // 获取要修改的那个用户的id值
-      // var id = $(this).attr('data-id');
-      // console.log(id);
-      // //发送请求 修改用户信息
-      // $.ajax({
-      // 	type: 'put',
-      // 	url: '/users/' + id,
-      // 	data: formData,
-      // 	success: function (response) {
-      // 		// 修改用户信息成功 重新加载页面
-      // 		location.reload()
-      //     //console.log('.....')
-      // 	}
-      // })
-
-      var formData = $(this).serialize();
-      var id = $(this).attr('data-id');
-      //console.log(id);
-      $.ajax({
+    $('#modifyBox').on('submit','#modifyForm',function(){
+        var formData =$(this).serialize();
+        var id=$(this).attr('data-id');
+        console.log(formData);
+        $.ajax({
         type: 'put',
         url: '/users/' + id,
         data: formData,
@@ -336,10 +334,9 @@
           location.reload();
         }
       })
-
-      // 阻止表单默认提交
-      return false;
+        return false;
     })
+
 
     //事件委托 给delete添加点击事件
     $('#userBox').on('click', '.delete', function () {
@@ -380,16 +377,6 @@ $('#userBox').on('change','.userStatus',function(){
   var inputs=$('#userBox').find('input');
 
     //inputs的长度和已经被点击的复选框的长度进行比较
-// if(inputs.length===inputs.filter(':checked').length){
-//   selectAll.prop('checked',true);
-// }else{
-//   selectAll.prop('checked',false);
-// }
-//   if(inputs.filter(':checked').length>0){
-//       deleteMany.show();
-//   }else{
-//       deleteMany.hide();
-//   }
 
   if(inputs.length===inputs.filter(':checked').length){
     selectAll.prop('checked',true);
@@ -405,22 +392,6 @@ $('#userBox').on('change','.userStatus',function(){
 }
 })
 
-// deleteMany.on('click',function(){
-//   var ids=[];
-//   var checkedUser=$('#userBox').find('input').filter(':checked');
-//   checkedUser.each(function(index,elemets){
-//     ids.push($(elemets).attr('data-id'));
-//   });
-//   if(confirm('确定批量删除')){
-//     $.ajax({
-//       type:'delete',
-//       url:'/users/'+ids.join('-'),
-//       success:function(){
-//         location.reload();
-//       }
-//     })
-//   }
-// })
 
 deleteMany.on('click',function(){
   //获得所有被选中的复选框的id

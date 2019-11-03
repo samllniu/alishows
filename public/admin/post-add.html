@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Add new post &laquo; Admin</title>
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="../assets/css/admin.css">
   <script src="../assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
   <script>NProgress.start()</script>
 
@@ -28,15 +30,16 @@
       <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-      <form class="row">
+      <form class="row" id="addForm">
         <div class="col-md-9">
           <div class="form-group">
             <label for="title">标题</label>
-            <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题">
+            <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题" id="title">
           </div>
           <div class="form-group">
-            <label for="content">标题</label>
-            <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"></textarea>
+            <label for="content">内容</label>
+            <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"
+              id="content"></textarea>
           </div>
         </div>
         <div class="col-md-3">
@@ -45,13 +48,11 @@
             <!-- show when image chose -->
             <img class="help-block thumbnail" style="display: none">
             <input id="feature" class="form-control" name="feature" type="file">
+            <input type="hidden" name="thumbnail" id="thumbnail">
           </div>
           <div class="form-group">
             <label for="category">所属分类</label>
-            <select id="category" class="form-control" name="category">
-              <option value="1">未分类</option>
-              <option value="2">潮生活</option>
-            </select>
+            <select id="category" class="form-control" name="category"></select>
           </div>
           <div class="form-group">
             <label for="created">发布时间</label>
@@ -59,7 +60,7 @@
           </div>
           <div class="form-group">
             <label for="status">状态</label>
-            <select id="status" class="form-control" name="status">
+            <select id="status" class="form-control" name="state">
               <option value="drafted">草稿</option>
               <option value="published">已发布</option>
             </select>
@@ -111,6 +112,85 @@
 
   <script src="../assets/vendors/jquery/jquery.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="../assets/vendors/art-template/template-web.js"></script>
   <script>NProgress.done()</script>
+  <script type="text/html" id="cateList">
+    {{each data}}
+    <option value="{{$value._id}}">{{$value.title}}</option>
+    {{/each}}  
+  </script>
+  <script>
+    获取所有文章
+    $.ajax({
+      url: '/categories',
+      type: 'get',
+      success: function (res) {
+        //console.log(res);
+        var html = template('cateList', { data: res });
+        //console.log(html);
+        $('#category').html(html);
+      }
+    })
+
+
+
+
+
+
+
+
+
+    //图片上传 使用formdata对象来上传所有二进制文件  很重要  
+    $('#feature').on('change', function () {
+      var formData = new FormData();
+      formData.append('cover', this.files[0]);
+      $.ajax({
+        url: '/upload',
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          //console.log(res);
+          $('#thumbnail').val(res[0].cover);
+        }
+      })
+    });
+
+    $('#addForm').on('submit', function () {
+      //var formData=$(this).serialize();
+
+      var title = $('#title').val();
+      var content = $('#content').val();
+      var thumbnail = $('#thumbnail').val();
+      var category = $('#category').val();
+      var created = $('#created').val();
+      var status = $('#status').val();
+      $.ajax({
+        type: 'post',
+        url: '/posts',
+        data: {
+          title: title,
+          content: content,
+          thumbnail: thumbnail,
+          category: category,
+          created: created,
+          status: status
+        },
+        success: function () {
+          // 文章添加成功 跳转到文章列表页面
+          location.href = '/admin/posts.html'
+        },
+        error: function () {
+          console.log('上传失败');
+        }
+      })
+      return false;
+    })
+
+
+
+  </script>
 </body>
+
 </html>
