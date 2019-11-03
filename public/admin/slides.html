@@ -30,17 +30,18 @@
       </div> -->
       <div class="row">
         <div class="col-md-4">
-          <form>
+          <form id="slideForm">
             <h2>添加新轮播内容</h2>
             <div class="form-group">
               <label for="image">图片</label>
               <!-- show when image chose -->
               <img class="help-block thumbnail" style="display: none">
-              <input id="image" class="form-control" name="image" type="file">
+              <input id="file" class="form-control" name="image" type="file">
+              <input type="hidden" name="image" id="image">
             </div>
             <div class="form-group">
               <label for="text">文本</label>
-              <input id="text" class="form-control" name="text" type="text" placeholder="文本">
+              <input id="title" class="form-control" name="title" type="text" placeholder="文本">
             </div>
             <div class="form-group">
               <label for="link">链接</label>
@@ -61,23 +62,8 @@
                 <th class="text-center" width="100">操作</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="text-center"><img class="slide" src="../uploads/slide_1.jpg"></td>
-                <td>XIU功能演示</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><img class="slide" src="../uploads/slide_2.jpg"></td>
-                <td>XIU功能演示</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
+            <tbody id="slideBox">
+             
             </tbody>
           </table>
         </div>
@@ -124,6 +110,78 @@
 
   <script src="../assets/vendors/jquery/jquery.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="../assets/vendors/art-template/template-web.js"></script>
   <script>NProgress.done()</script>
+  <script type="text/html" id="slidesTpl">
+    {{each data}}
+    <tr>
+      <td class="text-center"><img class="slide" src="{{$value.image}}"></td>
+      <td>{{$value.title}}</td>
+      <td>{{$value.link}}</td>
+      <td class="text-center">
+        <a href="javascript:;" class="btn btn-danger btn-xs delete" data-id="{{$value._id}}">删除</a>
+      </td>
+    </tr>
+    {{/each}}
+  </script>
+  <script>
+    //轮播图片的上传
+      $('#file').on('change', function () {
+        var file = this.files[0];
+        var formData = new FormData();
+        formData.append('image', file);
+        $.ajax({
+          type: 'post',
+          url: '/upload',
+          data: formData,
+          processData: false,
+          contentType: false,
+          success: function (response) {
+            //console.log(response[0].image)
+            $('#image').val(response[0].image)
+          }
+        })
+      });
+      //
+    $('#slideForm').on('submit',function(){
+        var formData=$(this).serialize();
+        //console.log(formData);
+        $.ajax({
+          url:'/slides',
+          type:'post',
+          data:formData,
+          success:function(data){
+              location.reload();
+          }
+        })
+        return false;
+    })
+
+
+    //轮播图展示
+      $.ajax({
+        type: 'get',
+        url: '/slides',
+        success: function (response) {
+          console.log(response)
+          var html = template('slidesTpl', { data: response });
+          $('#slideBox').html(html);
+        }
+      })
+
+      //删除轮播图功能
+        $('#slideBox').on('click', '.delete', function () {
+          var id = $(this).attr('data-id');
+          if (confirm('确认删除吗')) {
+            $.ajax({
+              type: 'delete',
+              url: `/slides/${id}`,
+              success: function () {
+                location.reload();
+              }
+            })
+          }
+        })
+  </script>  
 </body>
 </html>

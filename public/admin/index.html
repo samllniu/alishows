@@ -39,9 +39,9 @@
               <h3 class="panel-title">站点内容统计：</h3>
             </div>
             <ul class="list-group">
-              <li class="list-group-item"><strong>10</strong>篇文章（<strong>2</strong>篇草稿）</li>
-              <li class="list-group-item"><strong>6</strong>个分类</li>
-              <li class="list-group-item"><strong>5</strong>条评论（<strong>1</strong>条待审核）</li>
+              <li class="list-group-item" id="postAll"></li>
+              <li class="list-group-item" id="postCategories"></li>
+              <li class="list-group-item" id="commentAll"></li>
             </ul>
           </div>
         </div>
@@ -106,6 +106,30 @@
         }
       })
     })
+
+    $.ajax({
+      url:'/posts/count',
+      success:function(data){
+        console.log(data);
+        $('#postAll').html(`<strong>${data.postCount}</strong>篇文章（<strong>${data.draftCount}</strong>篇草稿）`)
+      }
+    })
+    $.ajax({
+      url:'/categories/count',
+      success:function(data){
+        console.log(data);
+        $('#postCategories').html(`<strong>${data.categoryCount}</strong>个分类`)
+      }
+    })
+
+    // $.ajax({
+    //   url:'/comment/count',
+    //   success:function(data){
+    //     console.log(data);
+    //     $('#commentAll').html(`<strong>${data.commentCount}</strong>条评论（<strong>1</strong>条待审核）`)
+    //   }
+    // })
+
   </script>
 </body>
 
